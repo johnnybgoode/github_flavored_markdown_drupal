@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * Implementation of hook_filter().
+ */
+function gfm_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
+  switch ($op) {
+    case 'list':
+      return array(0 => t('Github Flavored Markdown'));
+
+    case 'description':
+      return t('Provides added functionality to Markdown filter. Ensure GFM is run first.');
+
+    case 'process':
+			return _gfm_process_text( $text );
+
+    default:
+      return $text;
+  }
+}
+
+function _gfm_process_text($text) {
+	if ( !empty($text) ) {
+		// implement fenced code blocks
+		$text = preg_replace_callback('/(`{3})(.*)\1/s', '_gfm_fenced_code', $text);
+		// prevent foo_bar_baz from ending up with an italic word in the middle
+		$text = preg_replace_callback('/((?! {4}|\t)\w+_\w+_\w[\w_]*)/', '_gfm_escape_italics', $text);
+		// let single newlines become <br /> tags
+		$text = preg_replace_callback('/[\w\<][^\n]*\n+/', '_gfm_replace_newlines', $text);
+	}
+	return $text;
+}
+
+function _gfm_replace_newlines($matches) {
+	if ( preg_match('/\n\n/', $matches[0]) ) {
+		return $matches[0];
+	}
+	else {
+		return trim($matches[0]) . "  \n";
+	}
+}
+
+function _gfm_escape_italics($matches) {
+	return str_replace('_', '\_', $matches[0]);
+}
+
+function _gfm_fenced_code($matches) {
+	$lines = explode("\n", $matches[2]);
+	$text = '';
+	foreach ( $lines as $line ) {
+		$text .= '    ' . $line . "\n";
+	}
+	return $text;
+}
