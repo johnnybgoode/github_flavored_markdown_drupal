@@ -42,6 +42,7 @@ function gfm_process_text($text, $format) {
 
 		// Autolink urls
 		if ( variable_get('gfm_autolink_'.$format, 0) ) {
+			$text = _gfm_normalize_link_definitions($text);
 			$text = _gfm_autolink($text);
 		}
 
@@ -107,6 +108,45 @@ function _gfm_autolink_callback($matches) {
 	$url = $matches[0];
 	$full_url = (preg_match('{^(f|ht)tps?://}x',$url)) ? $url : 'http://'.$url;
 	return '[' . $url . '](' . $full_url . ')';
+}
+
+/*
+ *	Helper function for normalizing whitespace in link definintions
+ */
+function _gfm_normalize_link_definitions($text) {
+	// Thanks to John Gruber/Markdown for the following regex
+	return preg_replace_callback('{
+		^[ ]{0,3}\[(.+)\][ ]?:	# id = $1
+				[ ]*
+				\n?				# maybe *one* newline
+				[ ]*
+			(?:
+				<(.+?)>			# url = $2
+			|
+				(\S+?)			# url = $3
+			)
+				[ ]*
+				\n?				# maybe one newline
+				[ ]*
+			(?:
+				(?<=\s)			# lookbehind for whitespace
+				["(]
+				(.*?)			# title = $4
+				[")]
+				[ ]*
+			)?	# title is optional
+			(?:\n+|\Z)
+		}xm',
+		'_gfm_normalize_link_definitions_callback', $text);
+}
+
+/*
+ *	Link definition normalization callback
+ */
+function _gfm_normalize_link_definitions_callback($matches) {
+	$url = (!empty($matches[2])) ? $matches[2] : $matches[3];
+	$title = (!empty($matches[4])) ? ' "' . $matches[4] . '"' : '';
+	return '[' . $matches[1] . ']: ' . $url . $title . "\n";
 }
 
 /**
