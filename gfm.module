@@ -32,7 +32,7 @@ function gfm_process_text($text, $format) {
 	if ( !empty($text) ) {
 		// Implement fenced code blocks
 		if ( variable_get('gfm_fenced_code_'.$format, 0) ) {
-			$text = preg_replace_callback('/(`{3})(.*)\1/s', '_gfm_fenced_code_callback', $text);
+			$text = preg_replace_callback('/(`{3})[ ]*\n([^\n].*)\n\1/s', '_gfm_fenced_code_callback', $text);
 		}
 
 		// Prevent foo_bar_baz from ending up with an italic word in the middle
@@ -79,7 +79,7 @@ function _gfm_fenced_code_callback($matches) {
 	$lines = explode("\n", $matches[2]);
 	$text = '';
 	foreach ( $lines as $line ) {
-		$text .= '    ' . $line . "\n";
+		$text .= str_repeat(' ', 4) . $line . "\n";
 	}
 	return $text;
 }
@@ -114,25 +114,31 @@ function _gfm_autolink_callback($matches) {
  */
 function gfm_settings($format) {
 	return array(
-		'gfm_autolink_'.$format => array(
-			'#type' => 'checkbox',
-			'#title' => t('Enable Autolinking'),
-			'#default_value' => variable_get('gfm_autolink_'.$format, 1),
+		'gfm' => array(
+			'#type' => 'fieldset',
+			'#title' => 'Github Flavored Markdown',
+
+			'gfm_autolink_'.$format => array(
+				'#type' => 'checkbox',
+				'#title' => t('Enable Autolinking'),
+				'#default_value' => variable_get('gfm_autolink_'.$format, 1),
+			),
+			'gfm_fenced_code_'.$format => array(
+				'#type' => 'checkbox',
+				'#title' => t('Enable Fenced Code'),
+				'#default_value' => variable_get('gfm_fenced_code_'.$format, 1),
+			),
+			'gfm_escape_underscores_'.$format => array(
+				'#type' => 'checkbox',
+				'#title' => t('Escape Underscores in Words'),
+				'#default_value' => variable_get('gfm_escape_underscores_'.$format, 1),
+			),
+			'gfm_hardwrap_newlines_'.$format => array(
+				'#type' => 'checkbox',
+				'#title' => t('Hard Wrap Single Newlines'),
+				'#default_value' => variable_get('gfm_hardwrap_newlines_'.$format, 1),
+			),
 		),
-		'gfm_fenced_code_'.$format => array(
-			'#type' => 'checkbox',
-			'#title' => t('Enable Fenced Code'),
-			'#default_value' => variable_get('gfm_fenced_code_'.$format, 1),
-		),
-		'gfm_escape_underscores_'.$format => array(
-			'#type' => 'checkbox',
-			'#title' => t('Escape Underscores in Words'),
-			'#default_value' => variable_get('gfm_escape_underscores_'.$format, 1),
-		),
-		'gfm_hardwrap_newlines_'.$format => array(
-			'#type' => 'checkbox',
-			'#title' => t('Hard Wrap Single Newlines'),
-			'#default_value' => variable_get('gfm_hardwrap_newlines_'.$format, 1),
-		),
+	
 	);
 }
