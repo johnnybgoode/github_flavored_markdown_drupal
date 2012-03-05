@@ -44,7 +44,7 @@ function _gfm_process_text($text, $format) {
 		if ( variable_get('gfm_autolink_'.$format, 0) ) {
 			$autolink = new GFM_Autolink();
 			$text = preg_replace_callback('{
-				(?<!:\s)								# attempt to ignore link definitions of reference-style links
+				(?<!]:\s)								# attempt to ignore link definitions of reference-style links
 				(?<=\A|[\t\n ])					# positive lookbehind for BOF or tab, newline, or space
 					((f|ht)tps?://){0,1}	# optional scheme name, only ftp/http/https
 					([-\w]+\.)+           # server name(s) and domain
