@@ -1,8 +1,6 @@
 name = Github Flavored Markdown
 description = Provide Github flavored markdown tweaks http://github.github.com/github-flavored-markdown/
 package = Input filters
-version = 6.x-1.0-alpha
-
 core = 6.x
 dependencies[] = filter
 dependencies[] = markdown
