@@ -121,7 +121,7 @@ function _gfm_autolink_callback($matches) {
  *  Helper function for normalizing whitespace in link definintions
  */
 function _gfm_normalize_link_definitions($text) {
-  // Thanks to John Gruber/Markdown for the following regex.
+  // Thanks to Michel Fortin/Markdown PHP for the following regex.
   return preg_replace_callback('{
     ^[ ]{0,3}\[(.+)\][ ]?:  # id = $1
         [ ]*
