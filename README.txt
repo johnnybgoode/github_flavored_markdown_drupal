@@ -13,7 +13,7 @@ Installation
    is placed before Markdown.
 5. Optionally visit the 'Configure' tab and disable any features of Github
    Flavored Markdown that you do not need, for example if using Markdown Extra
-	 you may not need Github Flavored Markdown's fenced code functionality
+   you may not need Github Flavored Markdown's fenced code functionality
 
 Features
 ------------------------------
@@ -41,8 +41,8 @@ text surrounded by lines containing only three backticks (```). For example:
 ```
 is equivalent to
     <?php
-		  print 'Hello World';
-		?>
+      print 'Hello World';
+    ?>
 
 *Auto Linking of Raw URLs*
 Github Flavored Markdown attempts to find raw URLs in the text and format them
