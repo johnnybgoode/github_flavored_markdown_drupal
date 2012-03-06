@@ -1,4 +1,10 @@
 <?php
+/**
+ *  @file
+ *
+ *  Provides enhancements to the Markdown syntax as defined at:
+ *  http://github.github.com/github-flavored-markdown/
+ */
 
 /**
  * Implements hook_filter().
