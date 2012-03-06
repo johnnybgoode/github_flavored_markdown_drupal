@@ -8,17 +8,18 @@ function gfm_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
     case 'list':
       return array(0 => t('Github Flavored Markdown'));
 
-		case 'no cache': // Development & testing only
-			return TRUE;
+    // Development & testing only.
+    case 'no cache':
+      return TRUE;
 
     case 'description':
       return t('Provides added functionality to Markdown filter. Ensure GFM is run first.');
 
     case 'process':
-			return gfm_process_text($text, $format);
+      return gfm_process_text($text, $format);
 
-		case 'settings':
-			return gfm_settings($format);
+    case 'settings':
+      return gfm_settings($format);
 
     default:
       return $text;
@@ -26,159 +27,159 @@ function gfm_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
 }
 
 /**
- *	Process callback
+ *  Process callback
  */
 function gfm_process_text($text, $format) {
-	if ( !empty($text) ) {
-		// Implement fenced code blocks
-		if ( variable_get('gfm_fenced_code_'.$format, 0) ) {
-			$text = preg_replace_callback('/(`{3})[ ]*\n([^\n].*)\n\1/s', '_gfm_fenced_code_callback', $text);
-		}
+  if (!empty($text)) {
+    // Implement fenced code blocks.
+    if (variable_get('gfm_fenced_code_' . $format, 0)) {
+      $text = preg_replace_callback('/(`{3})[ ]*\n([^\n].*)\n\1/s', '_gfm_fenced_code_callback', $text);
+    }
 
-		// Prevent foo_bar_baz from ending up with an italic word in the middle
-		if ( variable_get('gfm_escape_underscores_'.$format, 0) ) {
-			$text = preg_replace_callback('/((?! {4}|\t)\w+_\w+_\w[\w_]*)/', '_gfm_escape_underscores_callback', $text);
-		}
+    // Prevent foo_bar_baz from ending up with an italic word in the middle.
+    if (variable_get('gfm_escape_underscores_' . $format, 0)) {
+      $text = preg_replace_callback('/((?! {4}|\t)\w+_\w+_\w[\w_]*)/', '_gfm_escape_underscores_callback', $text);
+    }
 
-		// Autolink urls
-		if ( variable_get('gfm_autolink_'.$format, 0) ) {
-			$text = _gfm_normalize_link_definitions($text);
-			$text = _gfm_autolink($text);
-		}
+    // Autolink urls.
+    if (variable_get('gfm_autolink_' . $format, 0)) {
+      $text = _gfm_normalize_link_definitions($text);
+      $text = _gfm_autolink($text);
+    }
 
-		// Let single newlines become <br /> tags
-		if ( variable_get('gfm_hardwrap_newlines_'.$format, 0) ) {
-			$text = preg_replace_callback('/[\w\<][^\n]*\n+/', '_gfm_hardwrap_newlines_callback', $text);
-		}
-	}
-	return $text;
-}
-
-/*
- *	Hardwrap newlines callback
- */
-function _gfm_hardwrap_newlines_callback($matches) {
-	if ( preg_match('/\n\n/', $matches[0]) ) {
-		return $matches[0];
-	}
-	else {
-		return trim($matches[0]) . "  \n";
-	}
-}
-
-/*
- *	Escape underscores callback
- */
-function _gfm_escape_underscores_callback($matches) {
-	return str_replace('_', '\_', $matches[0]);
-}
-
-/*
- *  Fenced code block callback
- */
-function _gfm_fenced_code_callback($matches) {
-	$lines = explode("\n", $matches[2]);
-	$text = '';
-	foreach ( $lines as $line ) {
-		$text .= str_repeat(' ', 4) . $line . "\n";
-	}
-	return $text;
-}
-
-/*
- *	Helper function for autolinking
- */
-function _gfm_autolink($text) {
-	return preg_replace_callback('{
-		(?<!]:\s)								# attempt to ignore link definitions of reference-style links
-		(?<=\A|[\t\n ])					# positive lookbehind for BOF or tab, newline, or space
-			((f|ht)tps?://){0,1}	# optional scheme name, only ftp/http/https
-			([-\w]+\.)+           # server name(s) and domain
-			[a-zA-Z0-9]{2,3}      # TLD
-			.*?										# query string, fragment, etc
-		(?=\Z|[\t\n ])					# positive lookahead for EOF or tab, newline, or space
-		}x',
-		'_gfm_autolink_callback', $text);
-}
-
-/*
- *	Autolink callback
- */
-function _gfm_autolink_callback($matches) {
-	$url = $matches[0];
-	$full_url = (preg_match('{^(f|ht)tps?://}x',$url)) ? $url : 'http://'.$url;
-	return '[' . $url . '](' . $full_url . ')';
-}
-
-/*
- *	Helper function for normalizing whitespace in link definintions
- */
-function _gfm_normalize_link_definitions($text) {
-	// Thanks to John Gruber/Markdown for the following regex
-	return preg_replace_callback('{
-		^[ ]{0,3}\[(.+)\][ ]?:	# id = $1
-				[ ]*
-				\n?				# maybe *one* newline
-				[ ]*
-			(?:
-				<(.+?)>			# url = $2
-			|
-				(\S+?)			# url = $3
-			)
-				[ ]*
-				\n?				# maybe one newline
-				[ ]*
-			(?:
-				(?<=\s)			# lookbehind for whitespace
-				["(]
-				(.*?)			# title = $4
-				[")]
-				[ ]*
-			)?	# title is optional
-			(?:\n+|\Z)
-		}xm',
-		'_gfm_normalize_link_definitions_callback', $text);
-}
-
-/*
- *	Link definition normalization callback
- */
-function _gfm_normalize_link_definitions_callback($matches) {
-	$url = (!empty($matches[2])) ? $matches[2] : $matches[3];
-	$title = (!empty($matches[4])) ? ' "' . $matches[4] . '"' : '';
-	return '[' . $matches[1] . ']: ' . $url . $title . "\n";
+    // Let single newlines become <br /> tags.
+    if (variable_get('gfm_hardwrap_newlines_' . $format, 0)) {
+      $text = preg_replace_callback('/[\w\<][^\n]*\n+/', '_gfm_hardwrap_newlines_callback', $text);
+    }
+  }
+  return $text;
 }
 
 /**
- *	Settings callback
+ *  Hardwrap newlines callback
+ */
+function _gfm_hardwrap_newlines_callback($matches) {
+  if (preg_match('/\n\n/', $matches[0])) {
+    return $matches[0];
+  }
+  else {
+    return trim($matches[0]) . "  \n";
+  }
+}
+
+/**
+ *  Escape underscores callback
+ */
+function _gfm_escape_underscores_callback($matches) {
+  return str_replace('_', '\_', $matches[0]);
+}
+
+/**
+ *  Fenced code block callback
+ */
+function _gfm_fenced_code_callback($matches) {
+  $lines = explode("\n", $matches[2]);
+  $text = '';
+  foreach ($lines as $line) {
+    $text .= str_repeat(' ', 4) . $line . "\n";
+  }
+  return $text;
+}
+
+/**
+ *  Helper function for autolinking
+ */
+function _gfm_autolink($text) {
+  return preg_replace_callback('{
+    (?<!]:\s)               # attempt to ignore link definitions of reference-style links
+    (?<=\A|[\t\n ])         # positive lookbehind for BOF or tab, newline, or space
+      ((f|ht)tps?://){0,1}  # optional scheme name, only ftp/http/https
+      ([-\w]+\.)+           # server name(s) and domain
+      [a-zA-Z0-9]{2,3}      # TLD
+      (:\d{1,5})?           # optional port
+      ([/?#][^\t\n ]*)?     # optional path, query or fragment
+    (?=\Z|[\t\n,. ])        # positive lookahead for EOF or tab, newline, space, comma, or period
+    }x',
+    '_gfm_autolink_callback', $text);
+}
+
+/**
+ *  Autolink callback
+ */
+function _gfm_autolink_callback($matches) {
+  $url = $matches[0];
+  $full_url = (preg_match('{^(f|ht)tps?://}x', $url)) ? $url : 'http://' . $url;
+  return '[' . $url . '](' . $full_url . ')';
+}
+
+/**
+ *  Helper function for normalizing whitespace in link definintions
+ */
+function _gfm_normalize_link_definitions($text) {
+  // Thanks to John Gruber/Markdown for the following regex.
+  return preg_replace_callback('{
+    ^[ ]{0,3}\[(.+)\][ ]?:  # id = $1
+        [ ]*
+        \n?       # maybe *one* newline
+        [ ]*
+      (?:
+        <(.+?)>     # url = $2
+      |
+        (\S+?)      # url = $3
+      )
+        [ ]*
+        \n?       # maybe one newline
+        [ ]*
+      (?:
+        (?<=\s)     # lookbehind for whitespace
+        ["(]
+        (.*?)     # title = $4
+        [")]
+        [ ]*
+      )?  # title is optional
+      (?:\n+|\Z)
+    }xm',
+    '_gfm_normalize_link_definitions_callback', $text);
+}
+
+/**
+ *  Link definition normalization callback
+ */
+function _gfm_normalize_link_definitions_callback($matches) {
+  $url = (!empty($matches[2])) ? $matches[2] : $matches[3];
+  $title = (!empty($matches[4])) ? ' "' . $matches[4] . '"' : '';
+  return '[' . $matches[1] . ']: ' . $url . $title . "\n";
+}
+
+/**
+ *  Settings callback
  */
 function gfm_settings($format) {
-	return array(
-		'gfm' => array(
-			'#type' => 'fieldset',
-			'#title' => 'Github Flavored Markdown',
+  return array(
+    'gfm' => array(
+      '#type' => 'fieldset',
+      '#title' => 'Github Flavored Markdown',
 
-			'gfm_autolink_'.$format => array(
-				'#type' => 'checkbox',
-				'#title' => t('Enable Autolinking'),
-				'#default_value' => variable_get('gfm_autolink_'.$format, 1),
-			),
-			'gfm_fenced_code_'.$format => array(
-				'#type' => 'checkbox',
-				'#title' => t('Enable Fenced Code'),
-				'#default_value' => variable_get('gfm_fenced_code_'.$format, 1),
-			),
-			'gfm_escape_underscores_'.$format => array(
-				'#type' => 'checkbox',
-				'#title' => t('Escape Underscores in Words'),
-				'#default_value' => variable_get('gfm_escape_underscores_'.$format, 1),
-			),
-			'gfm_hardwrap_newlines_'.$format => array(
-				'#type' => 'checkbox',
-				'#title' => t('Hard Wrap Single Newlines'),
-				'#default_value' => variable_get('gfm_hardwrap_newlines_'.$format, 1),
-			),
-		),
-	
-	);
+      'gfm_autolink_' . $format => array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Autolinking'),
+        '#default_value' => variable_get('gfm_autolink_' . $format, 1),
+      ),
+      'gfm_fenced_code_' . $format => array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Fenced Code'),
+        '#default_value' => variable_get('gfm_fenced_code_' . $format, 1),
+      ),
+      'gfm_escape_underscores_' . $format => array(
+        '#type' => 'checkbox',
+        '#title' => t('Escape Underscores in Words'),
+        '#default_value' => variable_get('gfm_escape_underscores_' . $format, 1),
+      ),
+      'gfm_hardwrap_newlines_' . $format => array(
+        '#type' => 'checkbox',
+        '#title' => t('Hard Wrap Single Newlines'),
+        '#default_value' => variable_get('gfm_hardwrap_newlines_' . $format, 1),
+      ),
+    ),
+  );
 }
