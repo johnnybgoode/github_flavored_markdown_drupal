@@ -13,8 +13,8 @@ function gfm_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
     case 'list':
       return array(0 => t('Github Flavored Markdown'));
 
-    // Development & testing only.
     case 'no cache':
+      // Development & testing only.
       return TRUE;
 
     case 'description':
