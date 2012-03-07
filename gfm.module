@@ -96,14 +96,15 @@ function _gfm_fenced_code_callback($matches) {
  */
 function _gfm_autolink($text) {
   return preg_replace_callback('{
+    # http://rubular.com/r/GRYtdjYzZK
     (?<!]:\s)               # attempt to ignore link definitions of reference-style links
-    (?<=\A|[\t\n ])         # positive lookbehind for BOF or tab, newline, or space
+    (?<=\A|[\s])            # positive lookbehind for BOF or tab, newline, or space
       ((f|ht)tps?://){0,1}  # optional scheme name, only ftp/http/https
       ([-\w]+\.)+           # server name(s) and domain
-      [a-zA-Z0-9]{2,3}      # TLD
+      [a-zA-Z0-9]{2,4}      # TLD
       (:\d{1,5})?           # optional port
-      ([/?#][^\t\n ]*)?     # optional path, query or fragment
-    (?=\Z|[\t\n,. ])        # positive lookahead for EOF or tab, newline, space, comma, or period
+      ([/?#][^\s]*)?        # optional path, query or fragment
+    (?=\Z|[\s,.])           # positive lookahead for EOF or tab, newline, space, comma, or period
     }x',
     '_gfm_autolink_callback', $text);
 }
